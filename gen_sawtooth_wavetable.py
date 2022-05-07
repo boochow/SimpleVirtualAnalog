@@ -12,7 +12,7 @@ max_frequency = 20000.
 table_size = 128 # for a half wave
 max_phi = 0.5
 max_value = 1.0 / 1.18
-max_harmonics = table_size / 2
+max_harmonics = table_size
 
 def note_to_freq(note):
     a = 440.0
@@ -25,6 +25,7 @@ def note_and_harmonics(note):
     freq = note_to_freq(note)
     harm = num_of_harmonics(freq)
     harm = harm - 1 if harm > 1 else 1
+    harm = max_harmonics if harm > max_harmonics else harm
     if harm > 0:
         return (note, harm)
     else:
@@ -38,7 +39,7 @@ def harmonics_to_notes(notes):
         result[h].extend([n])
     return result
 
-note_numbers = list(range(54, 138))
+note_numbers = list(range(24, 138))
 harmonics_notes = harmonics_to_notes(note_numbers)
 harmonics = harmonics_notes.keys()
 harmonics.sort(reverse=True)
@@ -53,7 +54,6 @@ t += max_phi / table_size / 2
 wave_tables = []
 for h in harmonics:
     wt = np.zeros(shape = (t.shape[0],),)
-##    for n in range(1, h + 1):
     for n in range(1, h + 1):
         wt += max_value * 2/(np.pi * n) * np.sin(2 * np.pi * n * t)
     wave_tables.append(wt)
