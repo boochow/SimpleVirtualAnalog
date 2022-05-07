@@ -24,17 +24,18 @@ def num_of_harmonics(freq):
 def note_and_harmonics(note):
     freq = note_to_freq(note)
     harm = num_of_harmonics(freq)
-    return (note, harm)
+    harm = harm - 1 if harm > 1 else 1
+    if harm > 0:
+        return (note, harm)
+    else:
+        return None
 
 def harmonics_to_notes(notes):
     note_harmonics = list(map(note_and_harmonics, notes))
     harmonics = list(set(map(lambda x: x[1], note_harmonics)))
     result = {h:[] for h in harmonics}
     for n, h in note_harmonics:
-        try:
-            result[h].extend([n])
-        except:
-            print(h, n)
+        result[h].extend([n])
     return result
 
 note_numbers = list(range(54, 138))
@@ -53,7 +54,7 @@ wave_tables = []
 for h in harmonics:
     wt = np.zeros(shape = (t.shape[0],),)
 ##    for n in range(1, h + 1):
-    for n in range(1, h):
+    for n in range(1, h + 1):
         wt += max_value * 2/(np.pi * n) * np.sin(2 * np.pi * n * t)
     wave_tables.append(wt)
 
