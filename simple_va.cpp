@@ -1,6 +1,6 @@
 /*
  * File: simple_va.cpp
- * a wave table oscillator 
+ * a wave table sawtooth oscillator 
  */
 
 #include "userosc.h"
@@ -31,20 +31,6 @@ __fast_inline uint8_t osc_my_idx(float note) {
     }
     return idx_i;
 #endif
-}
-
-__fast_inline float osc_mysinf(float x) {
-    const float p = x - (uint32_t)x;
-    float *wt = (float *) w_tbl[MAX_INDEX];
-
-    const float x0f = 2.f * p * w_tbl_size;
-    const uint32_t x0p = (uint32_t)x0f;
-
-    const uint32_t x0 = x0p & W_TBL_MASK;
-    const uint32_t x1 = (x0 + 1) & W_TBL_MASK;
-    
-    const float y0 = linintf(x0f - x0p, wt[x0], wt[x1]);
-    return (x0p < w_tbl_size) ? y0 : -y0;
 }
 
 __fast_inline float osc_bl2_my(float x, uint8_t idx) {
