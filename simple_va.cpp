@@ -13,14 +13,9 @@
 // #define DEBUG
 
 /* note number to wavetable index number */
-__fast_inline uint8_t osc_my_idx(float note) {
+__fast_inline float osc_my_idx_i(int note) {
     int idx_i;
-    int note_max, note_min;
 
-#ifdef DEBUG
-    return 1.0 * MAX_INDEX;
-#else
-    /* search index number */
     for(idx_i = 0; idx_i < w_tbl_idx_size; idx_i++) {
         if (note_boundary[idx_i] >= note) {
             break;
@@ -30,35 +25,63 @@ __fast_inline uint8_t osc_my_idx(float note) {
         idx_i--;
     }
     return idx_i;
+}
+
+__fast_inline float osc_my_idx(float note) {
+    int idx_0, idx_1;
+    int note_i = (int) note;
+    int note_f = note - note_i;
+
+#ifdef DEBUG
+    return 1.0 * MAX_INDEX;
+#else
+    /* search index number */
+    idx_0 = osc_my_idx_i(note);
+    idx_1 = osc_my_idx_i(note + 1);
+    /* fraction part */
+    if (idx_0 == idx_1) {
+        return idx_0;
+    } else {
+        int n0 = note_boundary[idx_0];
+        int n1 = note_boundary[idx_1];
+        return idx_0 + (note - n0) * 1.f / (n1 - n0);
+    }
 #endif
 }
 
-__fast_inline float osc_bl2_my(float x, uint8_t idx) {
+__fast_inline float osc_bl2_my(float x, float idx) {
     const float p = x - (uint32_t) x;
-    float sign;
+    int idx_i = (int) idx;
+    float idx_f = idx - idx_i;
+    float sign0, sign1;
 
     // half period stored -- fold back and invert
     const float x0f = p * 2 * w_tbl_size - 0.5;
     int32_t x0 = (uint32_t) x0f;
     float k = x0f - x0;
-    const float *wt = (float *) w_tbl[idx];
+    const float *wt = (float *) w_tbl[idx_i];
 
     if (x0 >= w_tbl_size) {
         x0 = 2 * w_tbl_size - 1 - x0;
-        sign = -1.f;
+        sign0 = -1.f;
     } else {
-        sign = 1.f;
+        sign0 = 1.f;
     }
-    const float y0 = wt[x0] * sign;
 
-    int32_t x1 = x0 + sign;
+    int32_t x1 = x0 + sign0;
     if (x1 < 0) {
         x1 = 0;
-        sign = 1.f;
+        sign1 = 1.f;
+    } else if (x1 == w_tbl_size) {
+        sign1 = -sign0;
+    } else {
+        sign1 = sign0;
     }
-    const float y1 = wt[x1] * sign;
+
+    const float y0 = linintf(k, wt[x0] * sign0, wt[x1] * sign1);
+    const float y1 = linintf(k, wt[x0] * sign0, wt[x1] * sign1);
     
-    return linintf(k, y0, y1);
+    return linintf(idx_f, y0, y1);
 }
 
 typedef struct State {
@@ -88,7 +111,7 @@ void OSC_CYCLE(const user_osc_param_t * const params,
     s_osc.flags = k_flags_none;
     
     const float note = (params->pitch >> 8) + (params->pitch & 0xFF)/256.0f;
-    const uint8_t wt_idx = osc_my_idx(note);
+    const float wt_idx = osc_my_idx(note);
     const float w0 = osc_w0f_for_note((params->pitch) >> 8, params->pitch & 0xFF);
     float phi = (flags & k_flag_reset) ? 0.f : s_osc.phi;
   
