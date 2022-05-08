@@ -6,9 +6,9 @@
         "api" : "1.1-0",
         "dev_id" : 0,
         "prg_id" : 0,
-        "version" : "0.1-0",
-        "name" : "simple va",
-        "num_param" : 6,
+        "version" : "1.0-0",
+        "name" : "smplva",
+        "num_param" : 0,
         "params" : [
             ["dummi0",    0, 100, "%"],
             ["dummy1",    0, 100, "%"],
