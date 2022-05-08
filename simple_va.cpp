@@ -30,7 +30,6 @@ __fast_inline float osc_my_idx_i(int note) {
 __fast_inline float osc_my_idx(float note) {
     int idx_0, idx_1;
     int note_i = (int) note;
-    int note_f = note - note_i;
 
 #ifdef DEBUG
     return 1.0 * MAX_INDEX;
@@ -42,9 +41,7 @@ __fast_inline float osc_my_idx(float note) {
     if (idx_0 == idx_1) {
         return idx_0;
     } else {
-        int n0 = note_boundary[idx_0];
-        int n1 = note_boundary[idx_1];
-        return idx_0 + (note - n0) * 1.f / (n1 - n0);
+        return idx_0 + (note - note_i);
     }
 #endif
 }
@@ -59,7 +56,7 @@ __fast_inline float osc_bl2_my(float x, float idx) {
     const float x0f = p * 2 * w_tbl_size - 0.5;
     int32_t x0 = (uint32_t) x0f;
     float k = x0f - x0;
-    const float *wt = (float *) w_tbl[idx_i];
+    float *wt = (float *) w_tbl[idx_i];
 
     if (x0 >= w_tbl_size) {
         x0 = 2 * w_tbl_size - 1 - x0;
@@ -79,8 +76,11 @@ __fast_inline float osc_bl2_my(float x, float idx) {
     }
 
     const float y0 = linintf(k, wt[x0] * sign0, wt[x1] * sign1);
+    wt += w_tbl_size + 1;
     const float y1 = linintf(k, wt[x0] * sign0, wt[x1] * sign1);
-    
+
+    idx_f = (idx_f > 0.5) ? 1.0 : 2 * idx_f;
+
     return linintf(idx_f, y0, y1);
 }
 
