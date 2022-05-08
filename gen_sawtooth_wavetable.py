@@ -8,7 +8,7 @@ def float_to_uint32(f):
     i = struct.unpack('I', bin)[0]
     return hex(i)
 
-max_frequency = 20000.
+max_frequency = 24000.
 table_size = 128 # for a half wave
 max_phi = 0.5
 max_value = 1.0 / 1.18
@@ -39,7 +39,7 @@ def harmonics_to_notes(notes):
         result[h].extend([n])
     return result
 
-note_numbers = list(range(24, 138))
+note_numbers = list(range(24, 139))
 harmonics_notes = harmonics_to_notes(note_numbers)
 harmonics = harmonics_notes.keys()
 harmonics.sort(reverse=True)
